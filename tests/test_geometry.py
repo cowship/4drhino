@@ -19,6 +19,13 @@ def test_point4d_distance_to_same_point():
     distance = a.distance_to(b)
     assert distance == pytest.approx(0)
 
+# 두 점 사이의 거리 계산 시 다른 객체 타입에 대한 예외 처리 테스트
+def test_point4d_distance_to_invalid_type():
+    a= Point4D(0,0,0,0)
+    b= "not a Point4D"
+    with pytest.raises(TypeError):
+        a.distance_to(b)
+
 # 점과 벡터의 덧셈 테스트
 def test_point4d_add_vector4d():
     p = Point4D(1, 2, 3, 4)
@@ -72,6 +79,13 @@ def test_vector4d_normalize_zero_vector():
     with pytest.raises(ValueError):
         v.normalize()
 
+#벡터 정규화 시 크기가 1인지 확인하는 테스트
+def test_vector4d_normalize_magnitude():
+    v = Vector4D(1, 2, 3, 4)
+    normalized = v.normalize()
+    magnitude = normalized.magnitude()
+    assert magnitude == pytest.approx(1.0)
+
 # 벡터 덧셈 테스트
 def test_vector4d_addition():
     v1 = Vector4D(1, 2, 3, 4)
@@ -123,6 +137,13 @@ def test_vector4d_dot_product():
     assert isinstance(dot_product, (int, float))
     assert dot_product == 20
 
+# 벡터 내적 시 다른 객체 타입에 대한 예외 처리 테스트
+def test_vector4d_dot_product_invalid_type():
+    v1 = Vector4D(1, 2, 3, 4)
+    v2 = "not a Vector4D"
+    with pytest.raises(TypeError):
+        v1.dot(v2)
+
 # 벡터 사이의 각도 계산 테스트
 def test_vector4d_angle_to():
     v1 = Vector4D(1, 0, 0, 0)
@@ -149,4 +170,11 @@ def test_vector4d_angle_to_zero_vector():
     v1 = Vector4D(1, 0, 0, 0)
     v2 = Vector4D(0, 0, 0, 0)
     with pytest.raises(ValueError):
+        v1.angle_to(v2)
+
+# 벡터 사이의 각도 계산 시 다른 객체 타입에 대한 예외 처리 테스트
+def test_vector4d_angle_to_invalid_type():
+    v1 = Vector4D(1, 0, 0, 0)
+    v2 = "not a Vector4D"
+    with pytest.raises(TypeError):
         v1.angle_to(v2)
