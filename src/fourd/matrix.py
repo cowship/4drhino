@@ -1,11 +1,12 @@
 
 from geometry import Vector4D
+from copy import deepcopy
 
 class Matrix4D:
     def __init__(self, data):
         if not self.is_4x4_nested_list(data):
             raise TypeError("Data must be a 4x4 nested list.")
-        self.data = data
+        self.data = deepcopy(data)
 
     #4x4 중첩 리스트인지 확인하는 정적 메서드
     @staticmethod

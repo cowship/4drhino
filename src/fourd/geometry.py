@@ -1,5 +1,6 @@
 
 import math
+from copy import deepcopy
 
 #4차원에서의 점
 class Point4D:
@@ -15,7 +16,7 @@ class Point4D:
     def __init__(self, data):
         if not self.is_4list(data):
             raise TypeError("Data must be a 4-element list of numbers.")
-        self.data = data
+        self.data = deepcopy(data)
 
     #4개의 좌표를 출력(디버그용)
     def __repr__(self):
@@ -57,7 +58,7 @@ class Vector4D:
     def __init__(self, data):
         if not self.is_4list(data):
             raise TypeError("Data must be a 4-element list of numbers.")
-        self.data = data
+        self.data = deepcopy(data)
 
     #4개의 성분을 출력(디버그용)
     def __repr__(self):
