@@ -15,8 +15,8 @@ class Matrix4D:
         if not isinstance(arr, list) or len(arr) != 4:
             return False
 
-        # 2. 각 내부 원소가 리스트이고 길이가 4인지 확인
-        return all(isinstance(row, list) and len(row) == 4 for row in arr)
+        # 2. 각 내부 원소가 리스트이고 길이가 4인지 확인하고 각 내부 원소가 숫자인지 확인
+        return all(isinstance(row, list) and len(row) == 4 and all(isinstance(num, (int, float)) for num in row) for row in arr)
 
     #4x4 행렬을 출력(디버그용)
     def __repr__(self):
@@ -49,7 +49,7 @@ class Matrix4D:
                 result[i] = sum(self.data[i][j] * other.data[j] for j in range(4))
             return Vector4D(*result)
         else:
-            raise TypeError("Can only multiply by another Matrix4D")
+            raise TypeError("Can only multiply by another Matrix4D or a Vector4D")
 
     #스칼라 곱 연산을 정의(스칼라 * 행렬)
     def __rmul__(self, scalar):
