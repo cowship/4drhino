@@ -119,7 +119,8 @@ def test_vector4d_negation():
 def test_vector4d_dot_product():
     v1 = Vector4D(1, 2, 3, 4)
     v2 = Vector4D(4, 3, 2, 1)
-    dot_product = v1.x * v2.x + v1.y * v2.y + v1.z * v2.z + v1.w * v2.w
+    dot_product = v1.dot(v2)
+    assert isinstance(dot_product, (int, float))
     assert dot_product == 20
 
 # 벡터 사이의 각도 계산 테스트
