@@ -1,5 +1,5 @@
 
-from geometry import Vector4D
+from fourd.geometry import Vector4D
 from copy import deepcopy
 
 class Matrix4D:
@@ -47,7 +47,7 @@ class Matrix4D:
             result = [0 for _ in range(4)]
             for i in range(4):
                 result[i] = sum(self.data[i][j] * other.data[j] for j in range(4))
-            return Vector4D(*result)
+            return Vector4D(result)
         else:
             raise TypeError("Can only multiply by another Matrix4D or a Vector4D")
 
@@ -62,7 +62,7 @@ class Matrix4D:
     def transpose(self):
         return Matrix4D([[self.data[j][i] for j in range(4)] for i in range(4)])
 
-    #항등행렬을 생성하는 정적 메서드
+    #항등행렬을 생성
     @staticmethod
     def identity():
         return Matrix4D([[1 if i == j else 0 for j in range(4)] for i in range(4)])
