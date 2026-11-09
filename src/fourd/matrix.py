@@ -66,3 +66,53 @@ class Matrix4D:
     @staticmethod
     def identity():
         return Matrix4D([[1 if i == j else 0 for j in range(4)] for i in range(4)])
+
+    # 기본행연산
+    # 행 교환
+    def row_swap(self, row1, row2):
+        if not (0 <= row1 < 4) or not (0 <= row2 < 4):
+            raise IndexError("Row indices must be between 0 and 3.")
+        self.data[row1], self.data[row2] = self.data[row2], self.data[row1]
+
+    # 행 정규화
+    def row_normalize(self, row):
+        if not (0 <= row < 4):
+            raise IndexError("Row index must be between 0 and 3.")
+
+        pivot = None
+        for i in range(4):
+            if self.data[row][i] != 0:
+                pivot = i
+                break
+
+        if pivot is None:
+            raise ValueError("Cannot normalize a zero row.")
+
+        divisor = self.data[row][pivot]
+        self.data[row] = [value / divisor for value in self.data[row]]
+
+    # pivot 열의 모든 원소를 제거
+    def row_eliminate(self, row):
+        if not (0 <= row < 4):
+            raise IndexError("Row indices must be between 0 and 3.")
+
+        pivot = None
+        for i in range(4):
+            if self.data[row][i] != 0:
+                pivot = i
+                break
+
+        if pivot is None:
+            raise ValueError("Cannot normalize a zero row.")
+        
+        for target_row in range(4):
+            if(target_row == row):
+                continue
+            factor = self.data[target_row][pivot] / self.data[row][pivot]
+            self.data[target_row] = [self.data[target_row][j] - factor * self.data[row][j] for j in range(4)]
+
+    # RREF 생성
+    def rref(self):
+        for i in range(4):
+            self.row_normalize(i)
+            self.row_eliminate(i)
