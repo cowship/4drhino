@@ -65,54 +65,149 @@ class Matrix4D:
     #항등행렬을 생성
     @staticmethod
     def identity():
-        return Matrix4D([[1 if i == j else 0 for j in range(4)] for i in range(4)])
+        return Matrix4D([[1 if i == j else 0 for j in range(4)] for i in range(4)]) 
 
     # 기본행연산
+
     # 행 교환
     def row_swap(self, row1, row2):
         if not (0 <= row1 < 4) or not (0 <= row2 < 4):
             raise IndexError("Row indices must be between 0 and 3.")
+
         self.data[row1], self.data[row2] = self.data[row2], self.data[row1]
 
     # 행 정규화
-    def row_normalize(self, row):
+    def row_normalize(self, row, pivot_col=None, tolerance=1e-12):
         if not (0 <= row < 4):
             raise IndexError("Row index must be between 0 and 3.")
 
-        pivot = None
-        for i in range(4):
-            if self.data[row][i] != 0:
-                pivot = i
-                break
+        if pivot_col is None:
+            pivot_col = None
+            for col in range(4):
+                if abs(self.data[row][col]) > tolerance:
+                    pivot_col = col
+                    break
 
-        if pivot is None:
+        if pivot_col is None:
             raise ValueError("Cannot normalize a zero row.")
 
-        divisor = self.data[row][pivot]
-        self.data[row] = [value / divisor for value in self.data[row]]
+        if not (0 <= pivot_col < 4):
+            raise IndexError("Column index must be between 0 and 3.")
 
-    # pivot 열의 모든 원소를 제거
-    def row_eliminate(self, row):
+        divisor = self.data[row][pivot_col]
+
+        if abs(divisor) <= tolerance:
+            raise ValueError("Pivot is too close to zero.")
+
+        self.data[row] = [
+            float(value) / divisor for value in self.data[row]
+        ]
+
+        # 부동소수점 오차 제거
+        for col in range(4):
+            if abs(self.data[row][col]) <= tolerance:
+                self.data[row][col] = 0.0
+
+    # 지정한 pivot 열의 다른 행 원소 제거
+    def row_eliminate(self, row, pivot_col=None, tolerance=1e-12):
         if not (0 <= row < 4):
-            raise IndexError("Row indices must be between 0 and 3.")
+            raise IndexError("Row index must be between 0 and 3.")
 
-        pivot = None
-        for i in range(4):
-            if self.data[row][i] != 0:
-                pivot = i
+        if pivot_col is None:
+            pivot_col = None
+            for col in range(4):
+                if abs(self.data[row][col]) > tolerance:
+                    pivot_col = col
+                    break
+
+        if pivot_col is None:
+            raise ValueError("Cannot eliminate using a zero row.")
+
+        if not (0 <= pivot_col < 4):
+            raise IndexError("Column index must be between 0 and 3.")
+
+        pivot = self.data[row][pivot_col]
+
+        if abs(pivot) <= tolerance:
+            raise ValueError("Pivot is too close to zero.")
+
+        for target_row in range(4):
+            if target_row == row:
+                continue
+
+            factor = float(self.data[target_row][pivot_col]) / pivot
+
+            if abs(factor) <= tolerance:
+                self.data[target_row][pivot_col] = 0.0
+                continue
+
+            self.data[target_row] = [
+                self.data[target_row][col] -
+                factor * self.data[row][col]
+                for col in range(4)
+            ]
+
+            # 계산 과정에서 발생한 작은 오차 제거
+            for col in range(4):
+                if abs(self.data[target_row][col]) <= tolerance:
+                    self.data[target_row][col] = 0.0
+
+    # Reduced Row Echelon Form 생성
+    def rref(self, epsilon=1e-12):
+        if not isinstance(epsilon, (int, float)) or epsilon < 0:
+            raise ValueError("Epsilon must be a non-negative number.")
+
+        # 원본 행렬 보존
+        result = Matrix4D(self.data)
+
+        # 행렬의 크기에 비례하는 허용 오차
+        scale = max(
+            abs(value)
+            for row in result.data
+            for value in row
+        )
+        tolerance = epsilon * scale
+
+        pivot_row = 0
+
+        # 열을 왼쪽에서 오른쪽으로 탐색
+        for pivot_col in range(4):
+
+            if pivot_row >= 4:
                 break
 
-        if pivot is None:
-            raise ValueError("Cannot normalize a zero row.")
-        
-        for target_row in range(4):
-            if(target_row == row):
-                continue
-            factor = self.data[target_row][pivot] / self.data[row][pivot]
-            self.data[target_row] = [self.data[target_row][j] - factor * self.data[row][j] for j in range(4)]
+            # 현재 열에서 가장 큰 절댓값을 가진 원소 탐색
+            best_row = None
+            best_value = 0.0
 
-    # RREF 생성
-    def rref(self):
-        for i in range(4):
-            self.row_normalize(i)
-            self.row_eliminate(i)
+            for row in range(pivot_row, 4):
+                value = abs(result.data[row][pivot_col])
+
+                if value > best_value:
+                    best_value = value
+                    best_row = row
+
+            # 현재 열에 유효한 pivot이 없으면 다음 열로 이동
+            if best_row is None or best_value <= tolerance:
+                continue
+
+            # Pivot 행을 현재 위치로 이동
+            result.row_swap(pivot_row, best_row)
+
+            # Pivot을 1로 정규화
+            result.row_normalize(
+                pivot_row,
+                pivot_col,
+                tolerance
+            )
+
+            # Pivot 열의 나머지 원소 제거
+            result.row_eliminate(
+                pivot_row,
+                pivot_col,
+                tolerance
+            )
+
+            pivot_row += 1
+
+        return result

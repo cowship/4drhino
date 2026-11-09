@@ -161,3 +161,151 @@ def test_matrix4d_transpose_multiplication():
     transposed_product = cast(Matrix4D, m1 * m2).transpose()
     product_of_transposes = m2.transpose() * m1.transpose()
     assert transposed_product.data == product_of_transposes.data
+
+
+# RREF 테스트
+
+def test_rref_already_reduced():
+    m = Matrix4D([
+        [1, 0, 2, 0],
+        [0, 1, 3, 0],
+        [0, 0, 0, 1],
+        [0, 0, 0, 0]
+    ])
+
+    result = m.rref()
+
+    assert result.data == m.data
+
+
+def test_rref_row_swap():
+    m = Matrix4D([
+        [0, 1, 2, 3],
+        [1, 0, 0, 0],
+        [0, 0, 1, 2],
+        [0, 0, 0, 0]
+    ])
+
+    result = m.rref()
+
+    expected = [
+        [1, 0, 0, 0],
+        [0, 1, 0, -1],
+        [0, 0, 1, 2],
+        [0, 0, 0, 0]
+    ]
+
+    assert result.data == expected
+
+
+def test_rref_zero_matrix():
+    m = Matrix4D([
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0]
+    ])
+
+    result = m.rref()
+
+    assert result.data == m.data
+
+
+def test_rref_dependent_rows():
+    m = Matrix4D([
+        [1, 2, 3, 4],
+        [2, 4, 6, 8],
+        [3, 6, 9, 12],
+        [0, 0, 0, 0]
+    ])
+
+    result = m.rref()
+
+    expected = [
+        [1, 2, 3, 4],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0]
+    ]
+
+    assert result.data == expected
+
+
+def test_rref_skip_zero_column():
+    m = Matrix4D([
+        [0, 1, 2, 3],
+        [0, 2, 4, 6],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0]
+    ])
+
+    result = m.rref()
+
+    expected = [
+        [0, 1, 2, 3],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0]
+    ]
+
+    assert result.data == expected
+
+
+def test_rref_float_values():
+    m = Matrix4D([
+        [0.1, 0.2, 0, 0],
+        [0.3, 0.6, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 0]
+    ])
+
+    result = m.rref()
+
+    expected = [
+        [1, 2, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 0],
+        [0, 0, 0, 0]
+    ]
+
+    for i in range(4):
+        for j in range(4):
+            assert abs(result.data[i][j] - expected[i][j]) < 1e-10
+
+
+def test_rref_preserves_original_matrix():
+    m = Matrix4D([
+        [1, 2, 3, 4],
+        [2, 4, 6, 8],
+        [0, 0, 1, 2],
+        [0, 0, 0, 0]
+    ])
+
+    original = [row[:] for row in m.data]
+
+    result = m.rref()
+
+    assert m.data == original
+    assert result is not m
+
+
+def test_rref_integer_division():
+    m = Matrix4D([
+        [2, 1, 0, 0],
+        [1, 1, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1]
+    ])
+
+    result = m.rref()
+
+    expected = [
+        [1, 0, 0, 0],
+        [0, 1, 0, 0],
+        [0, 0, 1, 0],
+        [0, 0, 0, 1]
+    ]
+
+    for i in range(4):
+        for j in range(4):
+            assert abs(result.data[i][j] - expected[i][j]) < 1e-10
