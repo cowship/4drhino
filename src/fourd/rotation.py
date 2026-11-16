@@ -36,7 +36,7 @@ class Rotation4D:
         matrix = matrix.transpose()
 
         # 여기서는 간단히 예시로 두 벡터를 반환
-        return Rotation4D.gram_schmidt(matrix.data[2], matrix.data[3])
+        return Rotation4D.gram_schmidt(Vector4D([0,0,1,0]) - Vector4D(matrix.data[2]), Vector4D([0,0,0,1]) - Vector4D(matrix.data[3]))
 
     # 4D 회전 행렬을 반환
     def get_rotation_matrix(self):
