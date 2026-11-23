@@ -20,6 +20,22 @@ using Rhino 7.
 
 ## Getting Started
 
+### Linux
+
+Set up the virtual environment (creates `.venv` and installs pytest):
+
+```bash
+bash scripts/setup_dev.sh
+```
+
+Run tests:
+
+```bash
+.venv/bin/python -m pytest
+```
+
+### Windows
+
 Activate the virtual environment:
 
 ```powershell
