@@ -4,9 +4,10 @@
 
 실행:  _RunPythonScript <repo>/rhino_app/main.py
 
-  - 처음 실행: 장면을 만들고 재생한다 (animate가 False이면 정지 화면)
+  - 처음 실행: 장면을 만들고 재생한다
   - 재생 중 다시 실행: 일시정지
   - 일시정지 상태에서 다시 실행: 아래 CONFIG를 다시 읽어 장면을 새로 만들고 이어서 재생
+  - CONFIG의 animate가 False이면: 재생 중이었더라도 멈추고 start_time 시점의 정지 화면을 그린다
   - 지우기: _RunPythonScript <repo>/rhino_app/clear.py
 
 설정은 아래 CONFIG에서 바꾼다. 바꿀 수 있는 항목과 기본값은 rhino_app/scene_config.py의
@@ -49,8 +50,9 @@ def main():
     config = scene_config.merged_config(CONFIG)
     previous = controller.current()
 
-    # 재생 중이면 일시정지
-    if previous is not None and previous.running:
+    # 재생 모드에서 재생 중이면 일시정지
+    # (정지 화면 모드이면 재생 중이었더라도 멈추고 정지 화면을 다시 그린다)
+    if config["animate"] and previous is not None and previous.running:
         previous.stop()
         print("fourd: paused at t = {:.2f} s (run again to resume, clear.py to remove)".format(previous.t))
         return

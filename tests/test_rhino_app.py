@@ -341,3 +341,17 @@ def test_invalid_config_keeps_paused_scene(rhino):
         run_main({"projection": "fisheye"})
     assert rhino.sticky["fourd.animator"] is paused
     assert rhino.sticky["fourd.conduit"] is conduit and conduit.Enabled
+
+
+# 재생 중에 정지 화면 모드로 바꾸고 실행하면 일시정지가 아니라 정지 화면을 그린다
+def test_switch_from_playing_to_static(rhino, capsys):
+    run_main()
+    playing = rhino.sticky["fourd.animator"]
+    playing.t = 4.0
+    run_main({"animate": False, "start_time": 1.0})
+    assert not playing.running
+    static = rhino.sticky["fourd.animator"]
+    assert static is not playing
+    assert not static.running and static.t == 1.0
+    out = capsys.readouterr().out
+    assert "static frame at t = 1.0" in out and "paused" not in out
