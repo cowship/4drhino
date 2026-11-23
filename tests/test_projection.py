@@ -240,3 +240,13 @@ def test_result_repr():
     result = OrthographicProjection().project(Tesseract())
     assert isinstance(result, ProjectionResult)
     assert repr(result) == "ProjectionResult(32 segments)"
+
+
+# 점의 투영 가능 여부 테스트
+def test_is_visible():
+    proj = PerspectiveProjection(4, near=1)
+    assert proj.is_visible(Point4D([0, 0, 0, 3]))
+    assert not proj.is_visible(Point4D([0, 0, 0, 3.01]))
+    assert OrthographicProjection().is_visible(Point4D([0, 0, 0, 1000]))
+    with pytest.raises(TypeError):
+        proj.is_visible(Vector4D([0, 0, 0, 0]))

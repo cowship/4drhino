@@ -72,17 +72,21 @@ class ProjectionResult(object):
         return min(values), max(values)
 
 
-class _Projection(object):
+class Projection(object):
     # 근접 평면의 w 값. None이면 클리핑하지 않는다.
     def _clip_limit(self):
         return None
 
-    # 하나의 점을 투영한 3D 좌표(튜플)
-    def project_point(self, point):
+    # 점이 투영 가능한 영역(근접 평면 앞쪽, 경계 포함)에 있는지
+    def is_visible(self, point):
         if not isinstance(point, Point4D):
             raise TypeError("The point must be an instance of Point4D.")
         limit = self._clip_limit()
-        if limit is not None and point.data[3] > limit:
+        return limit is None or point.data[3] <= limit
+
+    # 하나의 점을 투영한 3D 좌표(튜플)
+    def project_point(self, point):
+        if not self.is_visible(point):
             raise ValueError("The point is behind the near plane and cannot be projected.")
         return self._project_coords(point.data)
 
@@ -127,14 +131,14 @@ class _Projection(object):
         return cut, b, True, False
 
 
-class OrthographicProjection(_Projection):
+class OrthographicProjection(Projection):
     """w 성분을 버리는 직교 투영."""
 
     def _project_coords(self, data):
         return (float(data[0]), float(data[1]), float(data[2]))
 
 
-class PerspectiveProjection(_Projection):
+class PerspectiveProjection(Projection):
     """
     원근 투영.
 
