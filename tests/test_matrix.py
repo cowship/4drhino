@@ -1,6 +1,6 @@
 import pytest
 from typing import cast
-from fourd.geometry import Vector4D
+from fourd.geometry import Point4D, Vector4D
 from fourd.matrix import Matrix4D
 
 #matrix.py에 정의된 Matrix4D 클래스에 대한 테스트 케이스
@@ -309,3 +309,32 @@ def test_rref_integer_division():
     for i in range(4):
         for j in range(4):
             assert abs(result.data[i][j] - expected[i][j]) < 1e-10
+
+
+# 행렬과 점 곱셈 테스트(점은 원점 기준 위치 벡터로 취급)
+def test_matrix4d_point_multiplication():
+    m = Matrix4D([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]])
+    result = m * Point4D([1, 2, 3, 4])
+    assert isinstance(result, Point4D)
+    assert result.data == [30, 70, 110, 150]
+
+# 행렬식 테스트
+def test_determinant_identity():
+    assert Matrix4D.identity().determinant() == pytest.approx(1.0)
+
+def test_determinant_singular():
+    m = Matrix4D([[1, 2, 3, 4], [5, 6, 7, 8], [9, 10, 11, 12], [13, 14, 15, 16]])
+    assert m.determinant() == pytest.approx(0.0, abs=1e-9)
+
+def test_determinant_row_swap_changes_sign():
+    m = Matrix4D([[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
+    assert m.determinant() == pytest.approx(-1.0)
+
+def test_determinant_known_value():
+    m = Matrix4D([[2, 0, 1, 3], [1, 1, 0, 2], [0, 4, 1, 1], [3, 1, 2, 0]])
+    assert m.determinant() == pytest.approx(-28.0)
+
+def test_determinant_preserves_original_matrix():
+    m = Matrix4D([[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]])
+    m.determinant()
+    assert m.data == [[0, 1, 0, 0], [1, 0, 0, 0], [0, 0, 1, 0], [0, 0, 0, 1]]

@@ -1,8 +1,9 @@
+# -*- coding: utf-8 -*-
 
-from fourd.geometry import Vector4D
+from fourd.geometry import Point4D, Vector4D
 from copy import deepcopy
 
-class Matrix4D:
+class Matrix4D(object):
     def __init__(self, data):
         if not self.is_4x4_nested_list(data):
             raise TypeError("Data must be a 4x4 nested list.")
@@ -35,7 +36,8 @@ class Matrix4D:
         else:
             raise TypeError("Can only subtract another Matrix4D")
 
-    #행렬 곱셈 연산을 정의(행렬 * 행렬, 행렬 * 벡터)
+    #행렬 곱셈 연산을 정의(행렬 * 행렬, 행렬 * 벡터, 행렬 * 점)
+    #점은 원점에 대한 위치 벡터로 보고 선형변환을 적용한다
     def __mul__(self, other):
         if isinstance(other, Matrix4D):
             result = [[0 for _ in range(4)] for _ in range(4)]
@@ -48,8 +50,10 @@ class Matrix4D:
             for i in range(4):
                 result[i] = sum(self.data[i][j] * other.data[j] for j in range(4))
             return Vector4D(result)
+        elif isinstance(other, Point4D):
+            return Point4D([sum(self.data[i][j] * other.data[j] for j in range(4)) for i in range(4)])
         else:
-            raise TypeError("Can only multiply by another Matrix4D or a Vector4D")
+            raise TypeError("Can only multiply by another Matrix4D, a Vector4D or a Point4D")
 
     #스칼라 곱 연산을 정의(스칼라 * 행렬)
     def __rmul__(self, scalar):
@@ -65,7 +69,27 @@ class Matrix4D:
     #항등행렬을 생성
     @staticmethod
     def identity():
-        return Matrix4D([[1 if i == j else 0 for j in range(4)] for i in range(4)]) 
+        return Matrix4D([[1 if i == j else 0 for j in range(4)] for i in range(4)])
+
+    #행렬식 계산(부분 피벗팅을 사용한 가우스 소거법)
+    def determinant(self):
+        a = [[float(value) for value in row] for row in self.data]
+        det = 1.0
+        for col in range(4):
+            # 현재 열에서 절댓값이 가장 큰 행을 pivot으로 선택
+            pivot_row = max(range(col, 4), key=lambda r: abs(a[r][col]))
+            if a[pivot_row][col] == 0:
+                return 0.0
+            if pivot_row != col:
+                a[col], a[pivot_row] = a[pivot_row], a[col]
+                det = -det
+            pivot = a[col][col]
+            det *= pivot
+            for r in range(col + 1, 4):
+                factor = a[r][col] / pivot
+                for c in range(col, 4):
+                    a[r][c] -= factor * a[col][c]
+        return det
 
     # 기본행연산
 

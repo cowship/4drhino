@@ -1,9 +1,10 @@
+# -*- coding: utf-8 -*-
 
 import math
 from copy import deepcopy
 
 #4차원에서의 점
-class Point4D:
+class Point4D(object):
     @staticmethod
     def is_4list(arr):
         # 리스트이고 길이가 4인지 확인
@@ -45,7 +46,7 @@ class Point4D:
 
 
 #4차원에서의 벡터
-class Vector4D:
+class Vector4D(object):
     @staticmethod
     def is_4list(arr):
         # 리스트이고 길이가 4인지 확인
@@ -100,7 +101,7 @@ class Vector4D:
             raise TypeError("The other object must be an instance of Vector4D.")
         return self.data[0] * other.data[0] + self.data[1] * other.data[1] + self.data[2] * other.data[2] + self.data[3] * other.data[3]
 
-    #두 벡터 사이의 각도를 계산(도 단위)
+    #두 벡터 사이의 각도를 계산(라디안 단위, Rotation4D와 동일)
     def angle_to(self, other):
         if not isinstance(other, Vector4D):
             raise TypeError("The other object must be an instance of Vector4D.")
@@ -112,4 +113,4 @@ class Vector4D:
         cos_theta = dot_product / (mag_self * mag_other)
         # Clamp the value to avoid numerical issues(부동소숫점 오차를 방지하기 위해 값 제한)
         cos_theta = max(-1.0, min(1.0, cos_theta))
-        return math.degrees(math.acos(cos_theta))
+        return math.acos(cos_theta)

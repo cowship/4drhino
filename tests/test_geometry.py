@@ -1,3 +1,4 @@
+import math
 import pytest
 from fourd.geometry import Point4D, Vector4D
 
@@ -131,7 +132,7 @@ def test_vector4d_angle_to():
     v1 = Vector4D([1, 0, 0, 0])
     v2 = Vector4D([0, 1, 0, 0])
     angle = v1.angle_to(v2)
-    assert angle == pytest.approx(90.0)
+    assert angle == pytest.approx(math.pi / 2)
 
 # 벡터 사이의 각도 계산 시 동일한 벡터에 대한 테스트
 def test_vector4d_angle_to_same_vector():
@@ -145,7 +146,7 @@ def test_vector4d_angle_to_opposite_vector():
     v1 = Vector4D([1, 0, 0, 0])
     v2 = Vector4D([-1, 0, 0, 0])
     angle = v1.angle_to(v2)
-    assert angle == pytest.approx(180.0)
+    assert angle == pytest.approx(math.pi)
 
 # 벡터 사이의 각도 계산 시 0 벡터에 대한 테스트
 def test_vector4d_angle_to_zero_vector():
